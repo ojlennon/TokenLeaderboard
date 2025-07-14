@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  leaderboard-backend:
+    build:
+      context: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - BACKEND_PORT=3001
+    networks:
+      - appnet
+
+  leaderboard-frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://leaderboard-backend:3001
+    depends_on:
+      - leaderboard-backend
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
