@@ -14,7 +14,7 @@ export function Leaderboard() {
   const [maxScore, setMaxScore] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<Date | null>(null)
 
   // WebSocket effect
   useEffect(() => {
@@ -23,6 +23,7 @@ export function Leaderboard() {
     ws.onopen = () => {
       setIsLoading(false)
       setError(null)
+      setLastUpdatedTime(new Date()) // Set initial connection time
     }
 
     ws.onmessage = (event) => {
@@ -32,6 +33,7 @@ export function Leaderboard() {
           setUsers(message.data)
           const scores = message.data.map((user: User) => user.score)
           setMaxScore(scores.length > 0 ? Math.max(...scores) : 0)
+          setLastUpdatedTime(new Date()) // Update time when new data is received
         }
       } catch (error) {
         console.error('Error parsing message:', error)
@@ -49,23 +51,42 @@ export function Leaderboard() {
     }
   }, [])
 
-  // Time update effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
+  // Format the time string
+  const formatLastUpdated = () => {
+    if (!lastUpdatedTime) return 'Not yet updated'
+    
+    return `Last updated: ${lastUpdatedTime.toLocaleDateString()} ${lastUpdatedTime.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })}`
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-2">
-      <h1 className="text-3xl font-bold text-center text-gray-100 mb-2">Vibe Coding Leaderboard</h1> 
-      <h2 className="text-xl text-center text-gray-300 mb-4"> # Chat303 Tokens Used </h2>
+      <h1 className="text-3xl font-bold text-center text-gray-100 mb-2">
+        Vibe Coding Leaderboard
+      </h1>
+      <h2 className="text-xl text-center text-gray-300 mb-4">
+        # Chat303 Tokens Used
+      </h2>
+      
+      {/* Last updated time display */}
       <div className="text-gray-400 text-xl text-center mb-4">
-        {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
+        {formatLastUpdated()}
       </div>
 
+      {/* Show loading state */}
+      {isLoading && (
+        <div className="text-gray-400 text-center">Loading...</div>
+      )}
+
+      {/* Show error state */}
+      {error && (
+        <div className="text-red-400 text-center">{error}</div>
+      )}
+
+      {/* Leaderboard entries */}
       {users
         .sort((a, b) => b.score - a.score)
         .map((user) => (
