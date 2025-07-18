@@ -8,6 +8,7 @@ services:
       - "3001:3001"
     environment:
       - BACKEND_PORT=3001
+      - UPDATE_TIMEOUT=5000
     networks:
       - appnet
 

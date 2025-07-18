@@ -60,9 +60,11 @@ function updateScores() {
   });
 }
 
-setInterval(updateScores, 5000);
+// setInterval(updateScores, 300000);
+const updateTimeout = parseInt(process.env.UPDATE_TIMEOUT || '5000', 10); // 5 seconds
+setInterval(updateScores, updateTimeout);
 
-const PORT = 3001;
+const PORT = process.env.BACKEND_PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
